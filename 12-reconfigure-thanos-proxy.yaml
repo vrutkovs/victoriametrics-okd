@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: prometheus-k8s-thanos-sidecar
+  namespace: openshift-monitoring
+spec:
+  ports:
+    - name: thanos-proxy
+      protocol: TCP
+      port: 10902
+      targetPort: thanos-proxy
+  selector:
+    app: vm-to-prom-proxy
