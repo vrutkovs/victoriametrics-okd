@@ -14,6 +14,7 @@ spec:
       memory: 350Mi
   extraArgs:
     memory.allowedPercent: '40'
+    configAuthKey: 'foobar'
   replicaCount: 1
   serviceAccountName: prometheus-k8s
   remoteWrite:
