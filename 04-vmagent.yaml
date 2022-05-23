@@ -1,0 +1,27 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAgent
+metadata:
+  name: vmagent
+  namespace: openshift-monitoring
+spec:
+  selectAllByDefault: true
+  resources:
+    limits:
+      cpu: 500m
+      memory: 850Mi
+    requests:
+      cpu: 250m
+      memory: 350Mi
+  extraArgs:
+    memory.allowedPercent: '40'
+  replicaCount: 1
+  serviceAccountName: prometheus-k8s
+  remoteWrite:
+    - url: >-
+        http://vminsert-vmcluster.openshift-monitoring.svc.cluster.local:8480/insert/0/prometheus/api/v1/write
+  secrets:
+  - metrics-client-certs
+  - kube-etcd-client-certs
+  configMaps:
+  - serving-certs-ca-bundle
+  - kubelet-serving-ca-bundle
