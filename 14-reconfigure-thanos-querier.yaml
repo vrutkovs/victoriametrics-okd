@@ -7,12 +7,8 @@ spec:
   ports:
     - name: web
       protocol: TCP
-      port: 9091
-      targetPort: web
-    - name: tenancy
-      protocol: TCP
       port: 9092
-      targetPort: tenancy
+      targetPort: web
     - name: tenancy-rules
       protocol: TCP
       port: 9093

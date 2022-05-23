@@ -67,6 +67,47 @@ spec:
           - '-openshift-ca=/etc/pki/tls/cert.pem'
           - '-openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
           - '-htpasswd-file=/etc/proxy/htpasswd/auth'
+      - resources:
+          requests:
+            cpu: 1m
+            memory: 10Mi
+        terminationMessagePath: /dev/termination-log
+        name: thanos-proxy
+        ports:
+          - name: thanos-proxy
+            containerPort: 9092
+            protocol: TCP
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: secret-thanos-querier-tls
+            mountPath: /etc/tls/private
+          - name: secret-thanos-querier-oauth-cookie
+            mountPath: /etc/proxy/secrets
+          - name: thanos-querier-trusted-ca-bundle
+            readOnly: true
+            mountPath: /etc/pki/ca-trust/extracted/pem/
+        terminationMessagePolicy: FallbackToLogsOnError
+        image: >-
+          quay.io/openshift/okd-content:4.10.0-0.okd-2022-05-07-021833-oauth-proxy
+        args:
+          - '-provider=openshift'
+          - '-https-address=:9092'
+          - '-http-address='
+          - '-email-domain=*'
+          - '-upstream=http://localhost:8080'
+          - '-openshift-service-account=thanos-querier'
+          - '-openshift-sar={"resource": "namespaces", "verb": "get"}'
+          - >-
+            -openshift-delegate-urls={"/": {"resource": "namespaces", "verb":
+            "get"}}
+          - '-tls-cert=/etc/tls/private/tls.crt'
+          - '-tls-key=/etc/tls/private/tls.key'
+          - >-
+            -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+          - '-cookie-secret-file=/etc/proxy/secrets/session_secret'
+          - '-openshift-ca=/etc/pki/tls/cert.pem'
+          - '-openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+          - '-bypass-auth-for=^/-/(healthy|ready)$'
       serviceAccount: prometheus-k8s
       volumes:
       - name: nginx-conf
@@ -86,7 +127,23 @@ spec:
           defaultMode: 420
       - name: prometheus-trusted-ca-bundle
         configMap:
-          name: prometheus-trusted-ca-bundle-2rsonso43rc5p
+          name: prometheus-trusted-ca-bundle
+          items:
+            - key: ca-bundle.crt
+              path: tls-ca-bundle.pem
+          defaultMode: 420
+          optional: true
+      - name: secret-thanos-querier-tls
+        secret:
+          secretName: thanos-querier-tls
+          defaultMode: 420
+      - name: secret-thanos-querier-oauth-cookie
+        secret:
+          secretName: thanos-querier-oauth-cookie
+          defaultMode: 420
+      - name: thanos-querier-trusted-ca-bundle
+        configMap:
+          name: thanos-querier-trusted-ca-bundle
           items:
             - key: ca-bundle.crt
               path: tls-ca-bundle.pem
