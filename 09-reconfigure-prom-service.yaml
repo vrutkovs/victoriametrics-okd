@@ -1,0 +1,20 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: prometheus-k8s
+  namespace: openshift-monitoring
+spec:
+  ports:
+    - name: web
+      protocol: TCP
+      port: 8481
+      targetPort: web
+    - name: metrics
+      protocol: TCP
+      port: 9092
+      targetPort: metrics
+  selector:
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/instance: vmcluster
+    app.kubernetes.io/name: vmselect
+    managed-by: vm-operator
