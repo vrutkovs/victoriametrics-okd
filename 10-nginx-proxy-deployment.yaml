@@ -16,14 +16,79 @@ spec:
       containers:
       - name: nginx
         image: quay.io/packit/nginx-unprivileged:1.21.6
-        ports:
-        - name: web
-          containerPort: 8080
         volumeMounts:
             - name: nginx-conf
               mountPath: /etc/nginx/conf.d
               readOnly: true
+      - resources:
+          requests:
+            cpu: 1m
+            memory: 20Mi
+        terminationMessagePath: /dev/termination-log
+        name: prometheus-proxy
+        env:
+          - name: HTTP_PROXY
+          - name: HTTPS_PROXY
+          - name: NO_PROXY
+        ports:
+          - name: web
+            containerPort: 9091
+            protocol: TCP
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - name: secret-prometheus-k8s-tls
+            mountPath: /etc/tls/private
+          - name: secret-prometheus-k8s-proxy
+            mountPath: /etc/proxy/secrets
+          - name: secret-prometheus-k8s-htpasswd
+            mountPath: /etc/proxy/htpasswd
+          - name: prometheus-trusted-ca-bundle
+            readOnly: true
+            mountPath: /etc/pki/ca-trust/extracted/pem/
+        terminationMessagePolicy: FallbackToLogsOnError
+        image: >-
+          registry.ci.openshift.org/origin/4.10-2022-05-20-123933@sha256:4590b27bb9bb73f489572be33a0ba04675ed17f04a4d921dcef1862934bb3d17
+        args:
+          - '-provider=openshift'
+          - '-https-address=:9091'
+          - '-http-address='
+          - '-email-domain=*'
+          - '-upstream=http://localhost:8080'
+          - '-openshift-service-account=prometheus-k8s'
+          - '-openshift-sar={"resource": "namespaces", "verb": "get"}'
+          - >-
+            -openshift-delegate-urls={"/": {"resource": "namespaces", "verb":
+            "get"}}
+          - '-tls-cert=/etc/tls/private/tls.crt'
+          - '-tls-key=/etc/tls/private/tls.key'
+          - >-
+            -client-secret-file=/var/run/secrets/kubernetes.io/serviceaccount/token
+          - '-cookie-secret-file=/etc/proxy/secrets/session_secret'
+          - '-openshift-ca=/etc/pki/tls/cert.pem'
+          - '-openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
+          - '-htpasswd-file=/etc/proxy/htpasswd/auth'
+      serviceAccount: prometheus-k8s
       volumes:
       - name: nginx-conf
         configMap:
           name: vm-to-prom-proxy-conf
+      - name: secret-prometheus-k8s-tls
+        secret:
+          secretName: prometheus-k8s-tls
+          defaultMode: 420
+      - name: secret-prometheus-k8s-proxy
+        secret:
+          secretName: prometheus-k8s-proxy
+          defaultMode: 420
+      - name: secret-prometheus-k8s-htpasswd
+        secret:
+          secretName: prometheus-k8s-htpasswd
+          defaultMode: 420
+      - name: prometheus-trusted-ca-bundle
+        configMap:
+          name: prometheus-trusted-ca-bundle-2rsonso43rc5p
+          items:
+            - key: ca-bundle.crt
+              path: tls-ca-bundle.pem
+          defaultMode: 420
+          optional: true

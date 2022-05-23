@@ -7,7 +7,7 @@ spec:
   ports:
     - name: web
       protocol: TCP
-      port: 8080
+      port: 9091
       targetPort: web
   selector:
     app: vm-to-prom-proxy
