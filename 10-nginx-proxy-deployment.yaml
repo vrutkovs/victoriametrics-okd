@@ -47,7 +47,7 @@ spec:
             mountPath: /etc/pki/ca-trust/extracted/pem/
         terminationMessagePolicy: FallbackToLogsOnError
         image: >-
-          registry.ci.openshift.org/origin/4.10-2022-05-20-123933@sha256:4590b27bb9bb73f489572be33a0ba04675ed17f04a4d921dcef1862934bb3d17
+          quay.io/openshift/okd-content:4.10.0-0.okd-2022-05-07-021833-oauth-proxy
         args:
           - '-provider=openshift'
           - '-https-address=:9091'
@@ -83,7 +83,7 @@ spec:
             mountPath: /etc/tls/grpc
         terminationMessagePolicy: FallbackToLogsOnError
         image: >-
-          registry.ci.openshift.org/origin/4.10-2022-05-20-123933@sha256:3c0604548faa38d0ece2b05a07a850866b0f23f3ca62d0f4d0f5ff26946d8989
+          quay.io/openshift/okd-content:4.10.0-0.okd-2022-05-07-021833-thanos
         args:
           - sidecar
           - '--prometheus.url=http://localhost:8080/'
