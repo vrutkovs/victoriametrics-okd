@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vm-to-prom-proxy
+  namespace: openshift-monitoring
+spec:
+  selector:
+    matchLabels:
+      app: vm-to-prom-proxy
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: vm-to-prom-proxy
+    spec:
+      containers:
+      - name: nginx
+        image: quay.io/packit/nginx-unprivileged:1.21.6
+        ports:
+        - name: web
+          containerPort: 8080
+        volumeMounts:
+            - name: nginx-conf
+              mountPath: /etc/nginx/conf.d
+              readOnly: true
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: vm-to-prom-proxy-conf

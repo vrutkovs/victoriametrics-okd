@@ -1,0 +1,16 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vm-to-prom-proxy-conf
+  namespace: openshift-monitoring
+data:
+  vm-proxy.conf: |
+    server {
+      listen       8080;
+      listen       [::]:8080;
+      location / {
+        proxy_pass http://vmselect-vmcluster:8481/select/0/prometheus/;
+        proxy_http_version 1.1;
+      }
+    }

@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: prometheus-k8s
+  namespace: openshift-monitoring
+spec:
+  ports:
+    - name: web
+      protocol: TCP
+      port: 8080
+      targetPort: web
+  selector:
+    app: vm-to-prom-proxy
