@@ -36,7 +36,7 @@ spec:
             protocol: TCP
         imagePullPolicy: IfNotPresent
         volumeMounts:
-          - name: secret-prometheus-k8s-tls
+          - name: secret-thanos-querier-tls
             mountPath: /etc/tls/private
           - name: secret-prometheus-k8s-proxy
             mountPath: /etc/proxy/secrets
@@ -67,39 +67,14 @@ spec:
           - '-openshift-ca=/etc/pki/tls/cert.pem'
           - '-openshift-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
           - '-htpasswd-file=/etc/proxy/htpasswd/auth'
-      - resources:
-          requests:
-            cpu: 1m
-            memory: 25Mi
-        terminationMessagePath: /dev/termination-log
-        name: thanos-sidecar
-        ports:
-          - name: http
-            containerPort: 10902
-            protocol: TCP
-        imagePullPolicy: IfNotPresent
-        volumeMounts:
-          - name: secret-grpc-tls
-            mountPath: /etc/tls/grpc
-        terminationMessagePolicy: FallbackToLogsOnError
-        image: >-
-          quay.io/openshift/okd-content:4.10.0-0.okd-2022-05-07-021833-thanos
-        args:
-          - sidecar
-          - '--prometheus.url=http://localhost:8080/'
-          - '--tsdb.path=/prometheus'
-          - '--http-address=127.0.0.1:10902'
-          - '--grpc-server-tls-cert=/etc/tls/grpc/server.crt'
-          - '--grpc-server-tls-key=/etc/tls/grpc/server.key'
-          - '--grpc-server-tls-client-ca=/etc/tls/grpc/ca.crt'
       serviceAccount: prometheus-k8s
       volumes:
       - name: nginx-conf
         configMap:
           name: vm-to-prom-proxy-conf
-      - name: secret-prometheus-k8s-tls
+      - name: secret-thanos-querier-tls
         secret:
-          secretName: prometheus-k8s-tls
+          secretName: thanos-querier-tls
           defaultMode: 420
       - name: secret-prometheus-k8s-proxy
         secret:
@@ -117,7 +92,3 @@ spec:
               path: tls-ca-bundle.pem
           defaultMode: 420
           optional: true
-      - name: secret-grpc-tls
-        secret:
-          secretName: prometheus-k8s-grpc-tls-6flhejcs3itna
-          defaultMode: 420

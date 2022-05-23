@@ -1,0 +1,25 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: thanos-querier
+  namespace: openshift-monitoring
+spec:
+  ports:
+    - name: web
+      protocol: TCP
+      port: 9091
+      targetPort: web
+    - name: tenancy
+      protocol: TCP
+      port: 9092
+      targetPort: tenancy
+    - name: tenancy-rules
+      protocol: TCP
+      port: 9093
+      targetPort: tenancy-rules
+    - name: metrics
+      protocol: TCP
+      port: 9094
+      targetPort: metrics
+  selector:
+    app: vm-to-prom-proxy
