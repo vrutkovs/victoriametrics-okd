@@ -1,0 +1,15 @@
+apiVersion: operator.victoriametrics.com/v1beta1
+kind: VMAlert
+metadata:
+  name: vmalert
+  namespace: openshift-monitoring
+spec:
+  replicaCount: 1
+  datasource:
+    url: "http://vmselect-vmcluster.openshift-monitoring.svc.cluster.local:8481/select/0/prometheus"
+  notifier:
+    url: "http://vmalertmanager-vmalertmanager.openshift-monitoring.svc.cluster.local:9093"
+  evaluationInterval: "30s"
+  ruleSelector: {}
+  extraArgs:
+    remoteWrite.url: http://vminsert-vmcluster.openshift-monitoring.svc.cluster.local:8480/insert/0/prometheus
