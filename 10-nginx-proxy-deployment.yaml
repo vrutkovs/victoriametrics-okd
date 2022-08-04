@@ -133,10 +133,6 @@ spec:
               path: tls-ca-bundle.pem
           defaultMode: 420
           optional: true
-      - name: secret-thanos-querier-tls
-        secret:
-          secretName: thanos-querier-tls
-          defaultMode: 420
       - name: secret-thanos-querier-oauth-cookie
         secret:
           secretName: thanos-querier-oauth-cookie
